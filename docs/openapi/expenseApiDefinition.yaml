@@ -1,0 +1,170 @@
+openapi: 3.0.0
+info:
+  title: Expense Service
+  description: expense service to manage expenses.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Main Expense Dev (development) server
+
+paths:
+  /v1/expenses:
+    $ref: '#/expenses'
+
+  /v1/expenses/{expenseId}:
+    $ref: '#/expense'
+    
+  /v1/health:
+    get:
+      summary: Check service health.
+      description: Check service health.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  health:
+                    type: string
+                    enum:
+                      - service is up
+
+components:
+  schemas:
+    ExpenseModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+          enum:
+          - food
+          - other
+        amount:
+          type: number
+
+expenses:
+  get:
+    summary: Find expenses.
+    description: retrieves all expenses.
+    responses:
+      200:
+        description: expenses found.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExpenseModel'
+      404:
+        description: no expenses found.
+      500:
+        description: unexpected error ocurred.
+  post:
+    summary: Create expense.
+    description: adds an expense.
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExpenseModel'
+    responses:
+      201:
+        description: created expense.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseModel'
+      400:
+        description: invalid expense model.
+      500:
+        description: unexpected error ocurred.
+
+expense:
+  get:
+    summary: Find an expense.
+    description: retrieves an expense.
+    parameters:
+      - name: expenseId
+        in: path
+        description: expense id.
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      200:
+        description: expense found.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseModel'
+      400:
+        description: invalid expense id.
+      404:
+        description: no expense found.
+      500:
+        description: unexpected error ocurred.
+  put:
+    summary: Update an expense.
+    description: updates an expense.
+    parameters:
+    - name: expenseId
+      in: path
+      description: expense id.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExpenseModel'
+    responses:
+      200:
+        description: updated an expense.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseModel'
+      400:
+        description: invalid expense id or invalid expense model.
+      404:
+        description: no expense found.
+      500:
+        description: unexpected error ocurred.
+  delete:
+    summary: Remove an expense.
+    description: deletes an expense.
+    parameters:
+    - name: expenseId
+      in: path
+      description: expense id.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    responses:
+      200:
+        description: deleted an expense.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseModel'
+      400:
+        description: invalid expense id.
+      404:
+        description: no expense found.
+      500:
+        description: unexpected error ocurred.
